@@ -1,25 +1,20 @@
 # -*- coding: GBK -*-
-import httplib
-import time
+import urllib2
+import threading
 
-g_ConnectionList = []
+g_ThreadingPool = [] #业务层对线程的引用
 
-def	RequestData(addr, port=None, cb=None):
-	import save, misc
-	conn = httplib.HTTPConnection(addr, port)
-	print "请求开始时间", time.time()
-	conn.request("GET", '/')
-	print "请求结束时间", time.time()
-	response = conn.getresponse()
-	print "得到response", time.time()
-	status = response.status
-	reason = response.reason
-	body = response.read()
-	print "得到response数据", time.time()
-	print status, reason, len(body)
-	scriptPath = misc.GetScriptPath()
-	print "当前脚本路径", scriptPath
-	filePath = scriptPath + "/dingbady.html"
-	save.WriteToFile(body, filePath)
+def GetDataFromUrl(addr, port, cb, args):
+	try:
+		respone = urllib2.urlopen(addr)	#urllib2.urlopen()和read()两个接口都是阻塞型的
+		body = respone.read()
+		respone.close()
+		if cb:
+			cb(True, body, *args)
+	except:
+		if cb:
+			cb(False, 0, *args)
 
-
+def	RequestData(addr, port, cb, *args):
+	th = threading.Thread(target=GetDataFromUrl, args=(addr, port, cb, args))
+	th.start()	
