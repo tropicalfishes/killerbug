@@ -6,21 +6,23 @@ TESTURL = ["http://www.baidu.com", "http://hao.360.cn/", "https://www.taobao.com
 
 g_ThreadingLock = threading.Lock()
 
-def OnLoadFinish(bSucsess, data, id, url):
-	import time
+def OnLoadFinish(bSucsess, data):
+	import time, misc, stock
 	if g_ThreadingLock.acquire(LOCKTIMEOUT):
-		print id, url, time.time(), len(data)
+		dData = stock.ParsingData(data)
+		for sKey, v in dData.iteritems():
+			print sKey, ":", v
 		g_ThreadingLock.release()
 	else:
 		import misc
 		misc.PrintError("ERROR:获取锁超时")
 
 def Main():
-	import net, random, misc
-	for i in xrange(10):
-		cnt = len(TESTURL)
-		iRand = random.randint(0, cnt-1)
-		net.RequestData(TESTURL[iRand], None, OnLoadFinish, i, TESTURL[iRand])
-	misc.PrintError("试一下")
+	import net, stock
+	stockId = "002153"
+	sCode = stock.GetSearchCode(stockId)
+	url = "http://hq.sinajs.cn/list=%s"%sCode
+	print "url", url
+	net.RequestData(url, None, OnLoadFinish)
 
 Main()

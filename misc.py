@@ -38,3 +38,10 @@ def GetScriptPath():
 	import os
 	return os.path.split(os.path.realpath(__file__))[0]
 
+def List2Dict(lKeys, lData):
+	end = min(len(lKeys), len(lData))
+	d = {}
+	for i, sKey in enumerate(lKeys[:end]):
+		d[sKey] = lData[i]
+	return d
+
